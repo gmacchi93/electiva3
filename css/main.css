@@ -88,11 +88,11 @@ button.delete {
 
 #new-task:hover{
     border-color: orange;
-    box-shadow: orange;
+    box-shadow: 1px 1px 1px #FFA500;
 }
 
 #new-task:focus{
     border-color: orange;
-    box-shadow: orange;
+    box-shadow: 1px 1px 1px #FFA500;
     outline-color: orange;
 }
