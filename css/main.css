@@ -1,0 +1,98 @@
+body {
+    background-color: darkgray;
+    font-family: "Overpass";
+
+}
+
+.container {
+    padding-right: 15px;
+    padding-left: 15px;
+    margin-right: auto;
+    margin-left: auto;
+}
+@media (min-width: 768px) {
+    .container {
+        width: 750px;
+    }
+}
+@media (min-width: 992px) {
+    .container {
+        width: 970px;
+    }
+}
+@media (min-width: 1200px) {
+    .container {
+        width: 1170px;
+    }
+}
+
+.text-success{
+    color: green;
+}
+
+.text-pending{
+    color: red;
+}
+
+h1 {
+    color: darkblue;
+    font-size: 1.7em;
+}
+
+h2 {
+    color: midnightblue;
+    font-size: 1.2em;
+}
+
+ul {
+    list-style: none;
+    padding-left: 0px;
+}
+
+#completed-tasks li label{
+    text-decoration-line: underline;
+}
+
+button {
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+button.add {
+    border-color: green;
+    background-color: green;
+    color: white;
+    border-radius: 5px;
+}
+
+button.edit {
+    border-color: dodgerblue;
+    background-color: dodgerblue;
+    color: white;
+    border-radius: 5px;
+}
+
+button.delete {
+    border-color: red;
+    background-color: red;
+    color: white;
+    border-radius: 5px;
+}
+
+#new-task{
+    margin: 10px;
+    width: 200px;
+    height: 20px;
+    border-radius: 5px;
+}
+
+#new-task:hover{
+    border-color: orange;
+    box-shadow: orange;
+}
+
+#new-task:focus{
+    border-color: orange;
+    box-shadow: orange;
+    outline-color: orange;
+}
