@@ -11,7 +11,8 @@
     const API_URL = 'https://task-backend-fpuna.herokuapp.com/tasks';
     const TASK_STATUS = {
         PENDING: 'PENDIENTE',
-        DONE: 'TERMINADO'
+        DONE: 'TERMINADO',
+        CANCEL: 'CANCELADO'
     };
 
     class Task {
@@ -37,9 +38,14 @@
      * @param text error message
      */
     const showError = (code, text) => {
-        // TODO ITEM 6 recuperar el elemento HTML con la clase `error-bar` y modificar el HTML interno de
-        // manera a mostrar el mensaje de error.
-        // El mensaje de error debe desaparacer luego de 3 segundos.
+        console.log(text);
+        let errorBar = document.getElementsByClassName("error-bar")[0];
+        errorBar.innerText = text;
+        errorBar.classList.remove("hide-bar");
+        setTimeout(function () {
+            errorBar.classList.add("hide-bar");
+        }, 5000);
+
     };
 
 
@@ -96,14 +102,15 @@
         const checkBox = document.getElementById(`task-${task.id}`).querySelector('label > input');
         checkBox.onchange = (e) => {
             if (e.target.checked) {
-                document.getElementById(`task-${task.id}`).remove();
                 task.status = TASK_STATUS.DONE;
-                addTaskToList(task);
-                Ajax.sendPutRequest(API_URL + "/" + task.id, task, MediaFormat.JSON,
-                    (value) => console.log(value),
-                    (code, value) => showError(code, 'La tarea no ha podido ser actualizada.'),
-                    true);
+            } else {
+                task.status = TASK_STATUS.PENDING;
             }
+            document.getElementById(`task-${task.id}`).remove();
+            Ajax.sendPutRequest(API_URL + "/" + task.id, task, MediaFormat.JSON,
+                (value) => addTaskToList(JSON.parse(value)),
+                (code, value) => showError(code, 'La tarea no ha podido ser actualizada.'),
+                true);
         };
     };
 
@@ -112,13 +119,16 @@
      * @param task the new task.
      */
     const addTaskToList = (task) => {
-        console.log(task);
         let newItem = document.createElement('li');
         newItem.setAttribute('id', `task-${task.id}`);
 
-        let label = document.createElement('label');
-        label.innerHTML = `<input type="checkbox" ${task.status === TASK_STATUS.DONE ? "checked" : ""}/> ${task.description}`;
 
+        let label = document.createElement('label');
+        if (task.status !== TASK_STATUS.CANCEL) {
+            label.innerHTML = `<input type="checkbox" ${task.status === TASK_STATUS.DONE ? "checked" : ""}/> ${task.description}`;
+        } else {
+            label.innerHTML = `${task.description}`;
+        }
         let editButton = document.createElement('button');
         editButton.innerText = 'Editar';
         editButton.classList.add('edit');
@@ -130,17 +140,30 @@
         deleteButton.classList.add('delete');
         deleteButton.setAttribute('data-id', task.id);
         deleteButton.onclick = (e) => removeTask(e);
-
         newItem.appendChild(label);
         newItem.appendChild(editButton);
         newItem.appendChild(deleteButton);
+        console.log(task.status);
+
+        if (task.status === TASK_STATUS.PENDING) {
+            let cancelButton = document.createElement('button');
+            cancelButton.innerText = 'Cancelar';
+            cancelButton.classList.add('cancel');
+            cancelButton.setAttribute('data-id', task.id);
+            cancelButton.onclick = (e) => cancelTask(e);
+            newItem.appendChild(cancelButton);
+        }
+
 
         if (task.status === TASK_STATUS.PENDING)
             document.getElementById('incomplete-tasks').appendChild(newItem);
-        else
+        else if (task.status === TASK_STATUS.DONE)
             document.getElementById('completed-tasks').appendChild(newItem);
-
-        addOnChangeEvent(task);
+        else
+            document.getElementById('canceled-tasks').appendChild(newItem);
+        if (task.status !== TASK_STATUS.CANCEL) {
+            addOnChangeEvent(task);
+        }
     };
 
     /**
@@ -233,9 +256,26 @@
      */
     const removeTask = (e) => {
         const id = e.target.dataset.id;
-        Ajax.sendDeleteRequest(API_URL + '/'+id, null, MediaFormat.JSON,
+        Ajax.sendDeleteRequest(API_URL + '/' + id, null, MediaFormat.JSON,
             (value) => removeTaskFromList(id),
             (code) => showError(code, 'La tarea no ha podido ser eliminada.'),
             true);
     };
-})();
+
+    /**
+     * This method sends a PUT request to update the task from the server.
+     * @param e
+     */
+    const cancelTask = (e) => {
+        const id = e.target.dataset.id;
+        const checkBox = document.getElementById(`task-${id}`).querySelector('label > input');
+        if (!checkBox.checked) {
+            document.getElementById(`task-${id}`).remove();
+            Ajax.sendPutRequest(API_URL + "/" + id, {"status": TASK_STATUS.CANCEL}, MediaFormat.JSON,
+                (value) => addTaskToList(JSON.parse(value)),
+                (code, value) => showError(code, 'La tarea no ha podido ser cancelada.'),
+                true);
+        }
+    };
+})
+();
